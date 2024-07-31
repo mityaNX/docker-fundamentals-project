@@ -3,12 +3,34 @@ version: '3.9'
 
 services:
 
+  frontend:
+    container_name: frontend
+    build:
+      context: frontend
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      api:
+        condition: service_healthy
+    tty: true
+    ports:
+      - 3000:3000
+
   api:
     container_name: api
     build:
       context: api
     volumes:
       - ./api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: curl -f http://api:4000/ping
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
     tty: true
     ports:
       - 4000:4000
@@ -31,6 +53,7 @@ services:
       start_period: 10s
 
   adminer:
+    container_name: adminer
     image: adminer:4
     restart: always
     ports:

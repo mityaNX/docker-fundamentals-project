@@ -6,6 +6,10 @@ const app = express()
 
 app.use(express.json())
 
+app.get(`/ping`, async (req, res) => {
+  res.send(`pong`)
+})
+
 app.post(`/post`, async (req, res) => {
   const { title, content } = req.body
   const result = await prisma.post.create({
