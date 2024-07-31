@@ -3,18 +3,38 @@ version: '3.9'
 
 services:
 
+  api:
+    container_name: api
+    build:
+      context: api
+    volumes:
+      - ./api:/app
+    tty: true
+    ports:
+      - 4000:4000
+
   db:
-    image: postgres
+    container_name: db
+    image: postgres:16
     restart: always
-    # set shared memory limit when using docker-compose
-    shm_size: 128mb
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: secret
       POSTGRES_DB: app
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   adminer:
-    image: adminer
+    image: adminer:4
     restart: always
     ports:
       - 8080:8080
+
+volumes:
+  db:
